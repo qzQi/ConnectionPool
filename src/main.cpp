@@ -51,7 +51,8 @@ int main(){
     // 线程池实例，从server端看下是否连接，单例的使用不是说只能调用一次get
     // 而是每次get都是返回的相同的实例
     clock_t be=clock();
-    usePool();
+    // usePool();
+    notUse();
     clock_t ed=clock();
     cout<<(ed-be)<<"ticks"<<endl;
 

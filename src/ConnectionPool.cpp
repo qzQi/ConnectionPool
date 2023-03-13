@@ -127,6 +127,8 @@ shared_ptr<Connection> ConnectionPool::getConnection(){
         unique_lock<mutex> lk(_queueMutex);
         // 连接进入连接池，更新该条连接的时间
         // 还真得使用裸指针，这样每次sp对象析构的时候就可以更新连接时间
+        // 连接队列必须使用裸指针，如果直接使用智能指针并在一开始就传入析构动作会导致根本无法析构
+        // （因为析构动作就是加入连接队列）
         pcon->refreshAliveTime();
         _connectionQue.push(pcon);
     });
@@ -150,7 +152,7 @@ void ConnectionPool::scannerConnectionTask(){
         unique_lock<mutex> lk(_queueMutex);
         // while(_connectionQue.size())连接池里面仅仅是空闲的，而不是所有已经创建的
         // queue里面是空闲的
-        while(_connectionCnt<_initSize){
+        while(_connectionCnt>_initSize){
             if(_connectionQue.empty())break;
             Connection* p=_connectionQue.front();
             // clock除以CLOCKS_PER_SEC才是秒数            

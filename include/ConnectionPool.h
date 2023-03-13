@@ -15,7 +15,7 @@
 #include "Connection.h"
 
 using namespace std;
-
+ 
 class ConnectionPool{
 public:
     //获取单例
@@ -55,11 +55,14 @@ private:
     int _maxIdleTime;
     int _connectionTimeout;
 
-    // 实现线程安全的阻塞队列，有边界的阻塞队列？
+    // 实现线程安全的阻塞队列，有边界的阻塞队列？ 变形，生产的时机是连接队列为空
     // 生消模型都迷？
+    // 为什么存放裸指针? 一开始直接存放的智能指针，但是需要用户使用后自己放入
+    // 后来就直接存在裸指针，由裸指针构造智能指针再自定义析构动作
     queue<Connection*> _connectionQue;//存裸指针/智能指针 这个场景不复杂
     mutex _queueMutex;
     atomic_int _connectionCnt;
+    // 不算是严格的生产者/消费者，那个无界的一个条件变量not_empty，有界的两个not_empty和not_full
     condition_variable empty;
     condition_variable not_empty;
 };
